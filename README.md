@@ -676,8 +676,8 @@ The same methodology can be applied to:
 
 ### Connect With Me
 
-- LinkedIn: *(Add Link)*
-- GitHub: *(Add Link)*
+- LinkedIn: *(https://www.linkedin.com/in/hiifzza/)*
+- GitHub: *(https://github.com/hiifza)*
 
 ---
 
