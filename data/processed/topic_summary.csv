@@ -1,0 +1,6 @@
+topic_id,topic_label,review_count,pct_of_total,mean_vader,pct_positive,pct_negative,top_keywords
+3,General Satisfaction (1),18122,36.24,0.6982,95.8,2.4,"best, love, good, help, great, claude, amazing, helpful"
+0,Bugs & Performance,11112,22.22,0.1278,41.5,46.8,"not, message, conversation, voice, please, time, chat, work"
+4,Accuracy & Quality,9394,18.79,0.1398,51.4,40.9,"answer, not, give, question, time, good, image, information"
+1,Platform Comparison,7710,15.42,0.3029,55.9,37.2,"claude, better, chatgpt, limit, chat, free, not, pro"
+2,General Satisfaction,2142,4.28,0.278,66.4,30.1,"ever, best, hai, seen, download, maintenance, bhi, aur"

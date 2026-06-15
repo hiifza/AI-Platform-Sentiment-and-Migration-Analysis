@@ -1,0 +1,6 @@
+Platform,Total_Reviews,Comp_Mention_Count,Comp_Mention_Rate_%,Most_Mentioned_Rival,Rival_Mentions_n,Incoming_Mentions,Migration_Gains,Migration_Losses,Net_Migration,Top_Migration_Reason,Mig_Mention_Vader_Mean,Positive_Comp_Reviews,Negative_Comp_Reviews
+ChatGPT,10000,215,2.15,Gemini,139,3522,64,96,-32,General,0.4783,64,136
+Gemini,10000,489,4.89,ChatGPT,447,1134,36,21,15,General,0.3973,284,168
+Claude,10000,1515,15.15,ChatGPT,1326,183,75,51,24,General,0.5103,1132,300
+MS Copilot,10000,774,7.74,ChatGPT,564,110,11,8,3,General,0.2498,631,105
+Perplexity,10000,1375,13.75,ChatGPT,1185,133,16,26,-10,General,0.3288,440,853
