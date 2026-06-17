@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Platform Sentiment & Migration Analysis — 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080A;
+  --s1:#0D0E10;
+  --s2:#131416;
+  --s3:#1A1B1E;
+  --ink:#F0EDE8;
+  --ink2:#B8B2AA;
+  --ink3:#6C6660;
+  --blue:#5B8DEF;
+  --blue-glow:rgba(91,141,239,0.15);
+  --teal:#00C9A7;
+  --teal-glow:rgba(0,201,167,0.12);
+  --amber:#F0A500;
+  --amber-glow:rgba(240,165,0,0.12);
+  --rose:#FF6B6B;
+  --purple:#A78BFA;
+  --border:rgba(255,255,255,0.055);
+  --border-hi:rgba(255,255,255,0.11);
+  --r:18px;--r2:12px;--r3:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;line-height:1.65}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 1s ease}
+#loader.out{opacity:0;pointer-events:none}
+.ld-inner{display:flex;flex-direction:column;align-items:center;gap:24px}
+.ld-ring{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--s3);border-top-color:var(--blue);animation:spin 0.9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-text{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.22em;color:var(--ink3);text-transform:uppercase}
+
+/* NAV */
+nav{position:fixed;inset:0 0 auto 0;z-index:300;padding:18px 56px;display:flex;align-items:center;justify-content:space-between;transition:all 0.4s}
+nav.stuck{background:rgba(7,8,10,0.9);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
+.nav-brand{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink2);text-decoration:none;display:flex;align-items:center;gap:10px}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block;animation:pulse-dot 3s ease infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(91,141,239,0.5)}50%{box-shadow:0 0 0 6px rgba(91,141,239,0)}}
+.nav-menu{display:flex;gap:32px;list-style:none}
+.nav-menu a{font-size:12.5px;color:var(--ink3);text-decoration:none;letter-spacing:0.02em;transition:color 0.2s}
+.nav-menu a:hover{color:var(--ink)}
+
+/* ═══════════════════════════════════════ HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:160px 56px 100px;text-align:center;position:relative;overflow:hidden}
+.hero-mesh{position:absolute;inset:0;pointer-events:none;background:
+  radial-gradient(ellipse 80% 50% at 50% -10%,rgba(91,141,239,0.13) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 40% at 80% 60%,rgba(0,201,167,0.07) 0%,transparent 50%),
+  radial-gradient(ellipse 40% 30% at 20% 80%,rgba(240,165,0,0.06) 0%,transparent 50%)}
+.hero-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 70% 55% at 50% 50%,black 30%,transparent 80%)}
+
+.hero-chip{display:inline-flex;align-items:center;gap:9px;padding:7px 18px;border:1px solid var(--border-hi);border-radius:50px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);margin-bottom:44px;background:rgba(255,255,255,0.025);backdrop-filter:blur(8px)}
+.chip-live{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;animation:pulse-dot2 2s ease infinite}
+@keyframes pulse-dot2{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(46px,7.5vw,100px);font-weight:800;line-height:0.95;letter-spacing:-0.045em;margin-bottom:36px;color:var(--ink)}
+.ht-line2{display:block;background:linear-gradient(110deg,var(--blue) 0%,var(--teal) 55%,var(--blue) 100%);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+.ht-dim{color:var(--ink3);-webkit-text-fill-color:var(--ink3)}
+
+.hero-desc{font-size:clamp(15px,1.8vw,18px);color:var(--ink3);max-width:540px;margin:0 auto 56px;line-height:1.8;font-weight:300}
+
+/* STAT ROW */
+.stat-row{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:rgba(255,255,255,0.018);backdrop-filter:blur(12px);margin-bottom:52px}
+.stat-cell{flex:1;padding:24px 32px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:6px;transition:background 0.25s}
+.stat-cell:last-child{border-right:none}
+.stat-cell:hover{background:rgba(255,255,255,0.04)}
+.stat-n{font-family:'Syne',sans-serif;font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:-0.05em;color:var(--ink)}
+.stat-l{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3)}
+
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn-fill{display:inline-flex;align-items:center;gap:10px;padding:14px 30px;background:var(--blue);color:#fff;border-radius:50px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.25s;letter-spacing:0.01em;border:1px solid transparent}
+.btn-fill:hover{background:#6b9bf0;transform:translateY(-2px);box-shadow:0 16px 48px rgba(91,141,239,0.3)}
+.btn-fill svg{width:15px;height:15px;flex-shrink:0}
+.btn-stroke{display:inline-flex;align-items:center;gap:10px;padding:14px 30px;background:rgba(255,255,255,0.04);color:var(--ink2);border:1px solid var(--border-hi);border-radius:50px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.25s}
+.btn-stroke:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);transform:translateY(-2px)}
+
+.scroll-ind{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:fadein 0.8s ease 1.5s forwards}
+@keyframes fadein{to{opacity:1}}
+.scroll-line{width:1px;height:52px;background:linear-gradient(to bottom,transparent,var(--ink3));animation:dropanim 2s ease-in-out infinite}
+@keyframes dropanim{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.scroll-txt{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.25em;color:var(--ink3);text-transform:uppercase}
+
+/* ═══════════════════════════════════════ SECTION BASE */
+.sec{padding:120px 56px;position:relative}
+.inner{max-width:1200px;margin:0 auto}
+.ey{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);margin-bottom:14px}
+.sh{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,52px);font-weight:800;letter-spacing:-0.04em;line-height:1.05;color:var(--ink);margin-bottom:18px}
+.sp{font-size:15px;color:var(--ink3);line-height:1.8;font-weight:300;max-width:500px}
+.ctr{text-align:center}.ctr .sp{margin:0 auto}
+
+/* ═══════════════════════════════════════ ECOSYSTEM */
+#ecosystem{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.plat-grid{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:52px}
+.pcell{padding:40px 28px;border-right:1px solid var(--border);position:relative;overflow:hidden;transition:background 0.3s;cursor:default;display:flex;flex-direction:column}
+.pcell:last-child{border-right:none}
+.pcell-bar{position:absolute;top:0;left:0;right:0;height:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1)}
+.pcell:hover .pcell-bar{transform:scaleX(1)}
+.pcell:hover{background:rgba(255,255,255,0.025)}
+.p-chatgpt .pcell-bar{background:linear-gradient(90deg,#10a37f,#1dc68a)}
+.p-gemini .pcell-bar{background:linear-gradient(90deg,#4285F4,#0FA85E)}
+.p-claude .pcell-bar{background:linear-gradient(90deg,#e8784d,#D97757)}
+.p-copilot .pcell-bar{background:linear-gradient(90deg,#0078d4,#50a3e0)}
+.p-perplexity .pcell-bar{background:linear-gradient(90deg,#20b2aa,#00d4ca)}
+.p-emo{font-size:28px;margin-bottom:24px;display:block;line-height:1}
+.p-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.p-count{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;margin-bottom:20px}
+.p-pct{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--s3);letter-spacing:-0.05em;margin-top:auto}
+
+/* ═══════════════════════════════════════ PIPELINE */
+#pipeline{background:var(--bg)}
+.pipe-wrap{margin-top:52px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.prow{display:grid;grid-template-columns:56px 48px 1fr auto;align-items:center;padding:20px 28px;border-bottom:1px solid var(--border);transition:background 0.2s;gap:4px}
+.prow:last-child{border-bottom:none}
+.prow:hover{background:rgba(255,255,255,0.022)}
+.pr-n{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);letter-spacing:0.1em}
+.pr-ico{font-size:19px;text-align:center}
+.pr-body{padding:0 16px}
+.pr-body h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.pr-body p{font-size:12.5px;color:var(--ink3);line-height:1.5;font-weight:300}
+.pr-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);background:rgba(91,141,239,0.08);border:1px solid rgba(91,141,239,0.15);padding:5px 12px;border-radius:50px;letter-spacing:0.07em;white-space:nowrap}
+
+/* ═══════════════════════════════════════ SENTIMENT */
+#sentiment{background:var(--s1);border-top:1px solid var(--border)}
+.sent-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;margin-top:0}
+.sent-copy .sp{margin-bottom:20px}
+.findings{display:flex;flex-direction:column;gap:10px;margin-top:28px}
+.fd{border:1px solid var(--border);border-radius:var(--r2);padding:18px 20px;background:rgba(255,255,255,0.018);transition:all 0.25s}
+.fd:hover{border-color:var(--border-hi);background:rgba(255,255,255,0.04);transform:translateX(3px)}
+.fd-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:7px}
+.fd-ico{width:30px;height:30px;min-width:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.ico-blue{background:rgba(91,141,239,0.12)}
+.ico-teal{background:rgba(0,201,167,0.12)}
+.ico-amber{background:rgba(240,165,0,0.12)}
+.fd h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;padding-top:1px}
+.fd p{font-size:12.5px;color:var(--ink3);line-height:1.6;padding-left:42px;font-weight:300}
+
+/* FIGURE CARDS */
+.fig-stack{display:flex;flex-direction:column;gap:12px}
+.fc{border-radius:var(--r2);overflow:hidden;border:1px solid var(--border);background:var(--s2);cursor:pointer;transition:all 0.35s;position:relative;group:true}
+.fc:hover{border-color:var(--border-hi);transform:translateY(-4px);box-shadow:0 24px 72px rgba(0,0,0,0.6)}
+.fc-img{position:relative;overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center;min-height:130px}
+.fc-img img{width:100%;display:block;position:relative;z-index:1;transition:transform 0.4s}
+.fc:hover .fc-img img{transform:scale(1.03)}
+/* gradient overlay on images */
+.fc-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(7,8,10,0.4));z-index:2;pointer-events:none}
+.fc-foot{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.fc-foot span{font-size:12px;color:var(--ink3);font-weight:300}
+.fc-arr{font-size:14px;color:var(--ink3);transition:all 0.2s}
+.fc:hover .fc-arr{color:var(--blue);transform:translateX(3px)}
+
+/* ═══════════════════════════════════════ TOPICS */
+#topics{background:var(--bg)}
+.topic-info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:52px;margin-bottom:40px}
+.ti{border:1px solid var(--border);border-radius:var(--r2);padding:28px 24px;background:rgba(255,255,255,0.018);transition:all 0.25s}
+.ti:hover{border-color:var(--border-hi);background:rgba(255,255,255,0.035)}
+.ti-ico{font-size:22px;margin-bottom:16px}
+.ti h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.ti p{font-size:13px;color:var(--ink3);line-height:1.65;font-weight:300}
+.ti-tag{display:inline-block;margin-top:14px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);background:rgba(91,141,239,0.08);border:1px solid rgba(91,141,239,0.15);padding:3px 11px;border-radius:50px}
+
+/* BENTO */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bt{border-radius:var(--r2);overflow:hidden;border:1px solid var(--border);background:var(--s2);cursor:pointer;transition:all 0.35s;display:flex;flex-direction:column}
+.bt:hover{border-color:var(--border-hi);transform:translateY(-4px);box-shadow:0 20px 64px rgba(0,0,0,0.5)}
+.bt.w2{grid-column:span 2}
+.bt-img{flex:1;overflow:hidden;min-height:160px;position:relative;background:var(--s3);display:flex;align-items:center;justify-content:center}
+.bt-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s;position:relative;z-index:1}
+.bt-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(7,8,10,0.3));z-index:2;pointer-events:none}
+.bt:hover .bt-img img{transform:scale(1.05)}
+.bt-foot{padding:14px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.bt-foot h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.bt-foot p{font-size:11px;color:var(--ink3);font-weight:300}
+
+/* ═══════════════════════════════════════ MIGRATION */
+#migration{background:var(--s1);border-top:1px solid var(--border)}
+.mig-facts{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 52px}
+.mf{display:flex;align-items:center;gap:9px;padding:9px 17px;border:1px solid var(--border);border-radius:50px;font-size:13px;color:var(--ink2);background:rgba(255,255,255,0.025);transition:all 0.2s}
+.mf:hover{border-color:var(--border-hi);background:rgba(255,255,255,0.05)}
+.mf-d{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.d-teal{background:var(--teal)}.d-blue{background:var(--blue)}.d-amber{background:var(--amber)}.d-rose{background:var(--rose)}
+.mig-figs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.mig-full{margin-top:0}
+.mfig{border-radius:var(--r2);overflow:hidden;border:1px solid var(--border);background:var(--s2);cursor:pointer;transition:all 0.35s}
+.mfig:hover{border-color:var(--border-hi);transform:translateY(-4px);box-shadow:0 20px 64px rgba(0,0,0,0.5)}
+.mfig-img{min-height:160px;position:relative;overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center}
+.mfig-img img{width:100%;display:block;transition:transform 0.4s;position:relative;z-index:1}
+.mfig-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(7,8,10,0.4));z-index:2;pointer-events:none}
+.mfig:hover .mfig-img img{transform:scale(1.03)}
+.mfig-cap{padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--ink3);font-weight:300}
+
+/* ═══════════════════════════════════════ COMPETITIVE */
+#competitive{background:var(--bg)}
+
+/* BIG NUMBERS ROW */
+.big-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:52px}
+.bcard{border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;background:rgba(255,255,255,0.018);transition:all 0.3s;position:relative;overflow:hidden;cursor:default;display:flex;flex-direction:column;gap:0}
+.bcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px}
+.bcard-chatgpt::before{background:linear-gradient(90deg,transparent,#10a37f,transparent)}
+.bcard-blue::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.bcard-teal::before{background:linear-gradient(90deg,transparent,var(--teal),transparent)}
+.bcard-purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.bcard-rose::before{background:linear-gradient(90deg,transparent,var(--rose),transparent)}
+.bcard:hover{transform:translateY(-6px);border-color:var(--border-hi);background:rgba(255,255,255,0.03);box-shadow:0 24px 72px rgba(0,0,0,0.4)}
+.bc-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:20px}
+.bc-blue{background:rgba(91,141,239,0.12)}
+.bc-teal{background:rgba(0,201,167,0.12)}
+.bc-amber{background:rgba(240,165,0,0.12)}
+.bc-purple{background:rgba(167,139,250,0.12)}
+.bc-rose{background:rgba(255,107,107,0.12)}
+.bc-label{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
+.bc-val{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--ink);line-height:1.2;margin-bottom:10px;letter-spacing:-0.02em}
+.bc-desc{font-size:12px;color:var(--ink3);line-height:1.55;font-weight:300}
+
+/* ═══════════════════════════════════════ GALLERY (outputs only) */
+#gallery{background:var(--s1);border-top:1px solid var(--border)}
+.gallery-note{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink3);border:1px solid var(--border);border-radius:50px;padding:6px 16px;margin-bottom:48px}
+.masonry{columns:3;column-gap:12px}
+.mason{break-inside:avoid;margin-bottom:12px;border-radius:var(--r2);overflow:hidden;border:1px solid var(--border);background:var(--s2);cursor:pointer;transition:all 0.35s;display:block}
+.mason:hover{border-color:var(--border-hi);transform:translateY(-4px);box-shadow:0 20px 64px rgba(0,0,0,0.5)}
+.mason-img{min-height:100px;position:relative;overflow:hidden;background:var(--s3);display:flex;align-items:center;justify-content:center}
+.mason-img img{width:100%;display:block;position:relative;z-index:1;transition:transform 0.4s}
+.mason:hover .mason-img img{transform:scale(1.04)}
+.mason-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(7,8,10,0.5));z-index:2;pointer-events:none}
+.mason-cap{padding:10px 14px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase;line-height:1.3}
+
+/* ═══════════════════════════════════════ RESEARCH */
+#research{background:var(--bg)}
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:52px}
+.rcard{border:1px solid var(--border);border-radius:var(--r);padding:36px 28px;background:rgba(255,255,255,0.018);transition:all 0.3s;position:relative;overflow:hidden}
+.rcard:hover{border-color:var(--border-hi);background:rgba(255,255,255,0.035);transform:translateY(-5px)}
+.rcard.hi{border-color:rgba(91,141,239,0.18);background:rgba(91,141,239,0.04)}
+.rcard.hi:hover{border-color:rgba(91,141,239,0.35)}
+.rc-n{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--ink3);text-transform:uppercase;margin-bottom:22px}
+.rc-ico{font-size:28px;margin-bottom:14px}
+.rcard h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:12px;line-height:1.3}
+.rcard p{font-size:13px;color:var(--ink3);line-height:1.7;font-weight:300}
+
+/* ═══════════════════════════════════════ DATASET */
+#dataset{background:var(--s1);border-top:1px solid var(--border)}
+.ds-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.ds-copy .sp{margin-bottom:24px}
+.ds-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:36px}
+.dss{border:1px solid var(--border);border-radius:var(--r2);padding:22px 20px;background:rgba(255,255,255,0.018);transition:all 0.25s}
+.dss:hover{border-color:var(--border-hi);background:rgba(255,255,255,0.035)}
+.dss-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.04em;color:var(--ink);margin-bottom:4px}
+.dss-l{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3)}
+.ds-panel{border:1px solid var(--border);border-radius:var(--r);padding:36px;background:rgba(255,255,255,0.018)}
+.ds-ph{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:28px}
+.ds-br{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ds-br-l{font-size:12px;color:var(--ink3);width:86px;flex-shrink:0;font-weight:300}
+.ds-track{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.05);overflow:hidden}
+.ds-fill{height:100%;border-radius:2px;width:0;transition:width 1.8s cubic-bezier(0.4,0,0.2,1)}
+.ds-br-n{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);width:28px;text-align:right;letter-spacing:0.06em}
+.ds-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}
+.dchip{padding:5px 14px;border-radius:50px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--ink3);text-transform:uppercase;transition:all 0.2s}
+.dchip:hover{border-color:var(--border-hi);color:var(--ink2)}
+
+/* ═══════════════════════════════════════ TECH */
+#tech{background:var(--bg)}
+.tech-cloud{display:flex;flex-wrap:wrap;gap:9px;margin-top:48px;justify-content:center}
+.tp{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--ink2);transition:all 0.2s;cursor:default}
+.tp:hover{background:rgba(91,141,239,0.07);border-color:rgba(91,141,239,0.22);color:var(--ink);transform:translateY(-2px)}
+.tp-d{width:5px;height:5px;border-radius:50%;background:var(--blue);opacity:0.4}
+
+/* ═══════════════════════════════════════ CTA */
+#cta{padding:180px 56px;background:var(--s1);border-top:1px solid var(--border);text-align:center;position:relative;overflow:hidden}
+.cta-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(91,141,239,0.08) 0%,transparent 65%)}
+.cta-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+.cta-ey{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);margin-bottom:20px}
+.cta-h{font-family:'Syne',sans-serif;font-size:clamp(38px,5.5vw,68px);font-weight:800;letter-spacing:-0.045em;color:var(--ink);line-height:1.02;margin-bottom:20px}
+.cta-p{font-size:16px;color:var(--ink3);line-height:1.75;font-weight:300;margin-bottom:48px}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* ═══════════════════════════════════════ FOOTER */
+footer{padding:44px 56px;border-top:1px solid var(--border);background:var(--bg)}
+.foot{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+.foot-brand{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3)}
+.foot-links{display:flex;gap:28px}
+.foot-links a{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);text-decoration:none;transition:color 0.2s}
+.foot-links a:hover{color:var(--ink)}
+.foot-copy{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.08em;color:var(--ink3);text-transform:uppercase}
+
+/* ═══════════════════════════════════════ LIGHTBOX */
+#lb{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);align-items:center;justify-content:center;padding:48px}
+#lb.open{display:flex}
+#lb-img{max-width:88vw;max-height:84vh;border-radius:12px;object-fit:contain;box-shadow:0 40px 120px rgba(0,0,0,0.8)}
+#lb-x{position:absolute;top:22px;right:26px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--ink2);border-radius:50%;width:42px;height:42px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+#lb-x:hover{background:rgba(255,255,255,0.12)}
+#lb-cap{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);white-space:nowrap}
+
+/* ═══════════════════════════════════════ REVEAL */
+.rv{opacity:0;transform:translateY(30px);transition:opacity 0.75s cubic-bezier(0.4,0,0.2,1),transform 0.75s cubic-bezier(0.4,0,0.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:0.07s}.d2{transition-delay:0.14s}.d3{transition-delay:0.21s}.d4{transition-delay:0.28s}
+
+/* ═══════════════════════════════════════ RESPONSIVE */
+@media(max-width:1080px){
+  nav{padding:16px 28px}.nav-menu{display:none}
+  .sec{padding:88px 28px}#hero{padding:120px 28px 88px}
+  #cta{padding:110px 28px}footer{padding:36px 28px}
+  .plat-grid{grid-template-columns:repeat(3,1fr)}
+  .sent-grid{grid-template-columns:1fr;gap:48px}
+  .big-row{grid-template-columns:repeat(3,1fr)}
+  .masonry{columns:2}.res-grid{grid-template-columns:1fr 1fr}
+  .ds-grid{grid-template-columns:1fr;gap:40px}
+  .topic-info{grid-template-columns:1fr 1fr}
+  .bento{grid-template-columns:1fr 1fr}.bt.w2{grid-column:span 1}
+  .mig-figs{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .sec{padding:64px 20px}#hero{padding:100px 20px 72px}
+  #cta{padding:80px 20px}footer{padding:28px 20px}
+  .stat-row{flex-direction:column}
+  .stat-cell{border-right:none;border-bottom:1px solid var(--border)}
+  .stat-cell:last-child{border-bottom:none}
+  .plat-grid{grid-template-columns:1fr 1fr}
+  .big-row{grid-template-columns:1fr 1fr}
+  .masonry{columns:1}.res-grid{grid-template-columns:1fr}
+  .topic-info{grid-template-columns:1fr}.bento{grid-template-columns:1fr}
+  .bt.w2{grid-column:span 1}
+  .ds-stats{grid-template-columns:1fr 1fr}
+  .prow{grid-template-columns:44px 40px 1fr}.pr-tag{display:none}
+  .foot{flex-direction:column;gap:14px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-inner">
+    <div class="ld-ring"></div>
+    <div class="ld-text">Loading Research</div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lb">
+  <button id="lb-x">✕</button>
+  <img id="lb-img" src="" alt="">
+  <div id="lb-cap"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" class="nav-brand"><span class="nav-dot"></span>AI Ecosystem '26</a>
+  <ul class="nav-menu">
+    <li><a href="#sentiment">Sentiment</a></li>
+    <li><a href="#topics">Topics</a></li>
+    <li><a href="#migration">Migration</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#dataset">Dataset</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-chip rv">
+    <span class="chip-live"></span>
+    NLP &nbsp;·&nbsp; Competitive Intelligence &nbsp;·&nbsp; 50K Reviews
+  </div>
+
+  <h1 class="hero-title rv d1">
+    <span class="ht-dim">Understanding</span><br>
+    <span class="ht-line2">Generative AI</span><br>
+    <span class="ht-dim">Ecosystem</span>
+  </h1>
+
+  <p class="hero-desc rv d2">
+    A large-scale NLP framework built on 50,000 real user reviews — uncovering satisfaction trends, discussion themes, competitive dynamics, and migration behavior across ChatGPT, Gemini, Claude, Copilot, and Perplexity.
+  </p>
+
+  <div class="stat-row rv d3">
+    <div class="stat-cell"><div class="stat-n">50,000</div><div class="stat-l">User Reviews</div></div>
+    <div class="stat-cell"><div class="stat-n">5</div><div class="stat-l">AI Platforms</div></div>
+    <div class="stat-cell"><div class="stat-n">40+</div><div class="stat-l">Visualizations</div></div>
+    <div class="stat-cell"><div class="stat-n">5</div><div class="stat-l">Research Modules</div></div>
+  </div>
+
+  <div class="hero-btns rv d4">
+    <a href="https://github.com/hiifza/AI-Platform-Sentiment-and-Migration-Analysis" target="_blank" class="btn-fill">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub Repository
+    </a>
+    <a href="https://www.kaggle.com/datasets/jahnavikachhia23/the-generative-ai-ecosystem-50k-user-reviews-2026" target="_blank" class="btn-stroke">Kaggle Dataset ↗</a>
+  </div>
+
+  <div class="scroll-ind">
+    <div class="scroll-line"></div>
+    <div class="scroll-txt">Scroll</div>
+  </div>
+</section>
+
+<!-- ══════════ ECOSYSTEM ══════════ -->
+<section id="ecosystem" class="sec">
+  <div class="inner">
+    <div class="ctr rv" style="margin-bottom:0">
+      <div class="ey">Platforms Analyzed</div>
+      <h2 class="sh">Five platforms. One ecosystem.</h2>
+      <p class="sp" style="margin:0 auto">Perfectly balanced at 10,000 reviews each — enabling unbiased, rigorous comparison across the full generative AI landscape.</p>
+    </div>
+    <div class="plat-grid rv d1">
+      <div class="pcell p-chatgpt"><div class="pcell-bar"></div><span class="p-emo">🤖</span><div class="p-name">ChatGPT</div><div class="p-count">10,000 reviews</div><div class="p-pct">20%</div></div>
+      <div class="pcell p-gemini"><div class="pcell-bar"></div><span class="p-emo">🌐</span><div class="p-name">Gemini</div><div class="p-count">10,000 reviews</div><div class="p-pct">20%</div></div>
+      <div class="pcell p-claude"><div class="pcell-bar"></div><span class="p-emo">🧠</span><div class="p-name">Claude</div><div class="p-count">10,000 reviews</div><div class="p-pct">20%</div></div>
+      <div class="pcell p-copilot"><div class="pcell-bar"></div><span class="p-emo">💼</span><div class="p-name">Copilot</div><div class="p-count">10,000 reviews</div><div class="p-pct">20%</div></div>
+      <div class="pcell p-perplexity"><div class="pcell-bar"></div><span class="p-emo">🔍</span><div class="p-name">Perplexity</div><div class="p-count">10,000 reviews</div><div class="p-pct">20%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PIPELINE ══════════ -->
+<section id="pipeline" class="sec">
+  <div class="inner">
+    <div class="rv" style="margin-bottom:0">
+      <div class="ey">Methodology</div>
+      <h2 class="sh">Research pipeline</h2>
+      <p class="sp" style="margin-bottom:0">Seven sequential stages — from raw reviews to production-ready intelligence dashboards.</p>
+    </div>
+    <div class="pipe-wrap rv d1">
+      <div class="prow"><div class="pr-n">01</div><div class="pr-ico">📥</div><div class="pr-body"><h3>Dataset Collection</h3><p>50,000 reviews from Kaggle — 5 platforms, 10K each, balanced and unbiased</p></div><div class="pr-tag">Kaggle</div></div>
+      <div class="prow"><div class="pr-n">02</div><div class="pr-ico">🧹</div><div class="pr-body"><h3>Preprocessing</h3><p>Text normalization, noise removal, feature extraction and quality filtering</p></div><div class="pr-tag">NLTK · Pandas</div></div>
+      <div class="prow"><div class="pr-n">03</div><div class="pr-ico">🎭</div><div class="pr-body"><h3>Sentiment Analysis</h3><p>VADER + TextBlob ensemble with novel community-weighted TWSI scoring</p></div><div class="pr-tag">VADER · TextBlob</div></div>
+      <div class="prow"><div class="pr-n">04</div><div class="pr-ico">🗂️</div><div class="pr-body"><h3>Topic Modeling</h3><p>Hybrid LDA coherence optimization combined with BERTopic semantic clustering</p></div><div class="pr-tag">BERTopic · Gensim</div></div>
+      <div class="prow"><div class="pr-n">05</div><div class="pr-ico">🔀</div><div class="pr-body"><h3>Migration Detection</h3><p>Network-based analysis of user switching patterns, flows and root causes</p></div><div class="pr-tag">NetworkX</div></div>
+      <div class="prow"><div class="pr-n">06</div><div class="pr-ico">🏆</div><div class="pr-body"><h3>Competitive Intelligence</h3><p>Cross-platform benchmarking, positioning, and competitive signal extraction</p></div><div class="pr-tag">Scikit-Learn</div></div>
+      <div class="prow"><div class="pr-n">07</div><div class="pr-ico">📊</div><div class="pr-body"><h3>Interactive Dashboard</h3><p>Plotly + Streamlit multi-panel dashboards with real-time filtering and exploration</p></div><div class="pr-tag">Plotly · Streamlit</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SENTIMENT ══════════ -->
+<section id="sentiment" class="sec">
+  <div class="inner">
+    <div class="sent-grid">
+      <div class="sent-copy rv">
+        <div class="ey">Notebook 03</div>
+        <h2 class="sh">Sentiment intelligence</h2>
+        <p class="sp">We developed a novel community-weighted satisfaction scoring system (TWSI) that incorporates engagement signals beyond raw text polarity.</p>
+        <p class="sp">This approach fundamentally altered platform rankings — surfacing community consensus as a distinct, powerful signal.</p>
+        <div class="findings">
+          <div class="fd">
+            <div class="fd-row"><div class="fd-ico ico-amber">🏅</div><h4>Copilot achieved the highest community-weighted score</h4></div>
+            <p>Invisible through standard sentiment — only surfaces when community endorsement is weighted into scoring.</p>
+          </div>
+          <div class="fd">
+            <div class="fd-row"><div class="fd-ico ico-teal">📈</div><h4>Community signals reshape platform rankings entirely</h4></div>
+            <p>Platforms with high raw ratings but low engagement ranked significantly lower after TWSI weighting.</p>
+          </div>
+          <div class="fd">
+            <div class="fd-row"><div class="fd-ico ico-blue">📉</div><h4>Score variance exposes hidden quality risks</h4></div>
+            <p>Boxplot analysis revealed extreme outliers in high-median platforms — a consistency gap invisible to averages.</p>
+          </div>
+        </div>
+      </div>
+      <div class="fig-stack rv d2">
+        <div class="fc" onclick="openLb('outputs/figures/fig_nb03_04_twsi_ranking.png','TWSI Community-Weighted Platform Ranking')">
+          <div class="fc-img"><img src="outputs/figures/fig_nb03_04_twsi_ranking.png" alt="TWSI Ranking" loading="lazy"></div>
+          <div class="fc-foot"><span>Community-Weighted TWSI Ranking</span><span class="fc-arr">→</span></div>
+        </div>
+        <div class="fc" onclick="openLb('outputs/figures/fig_nb03_07_platform_dashboard.png','Platform Sentiment Dashboard')">
+          <div class="fc-img"><img src="outputs/figures/fig_nb03_07_platform_dashboard.png" alt="Platform Dashboard" loading="lazy"></div>
+          <div class="fc-foot"><span>Platform-Level Sentiment Dashboard</span><span class="fc-arr">→</span></div>
+        </div>
+        <div class="fc" onclick="openLb('outputs/figures/fig_nb03_06_score_boxplots.png','Score Distribution')">
+          <div class="fc-img"><img src="outputs/figures/fig_nb03_06_score_boxplots.png" alt="Score Boxplots" loading="lazy"></div>
+          <div class="fc-foot"><span>Score Distribution — All Platforms</span><span class="fc-arr">→</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TOPICS ══════════ -->
+<section id="topics" class="sec">
+  <div class="inner">
+    <div class="rv" style="margin-bottom:0">
+      <div class="ey">Notebook 04</div>
+      <h2 class="sh">Topic intelligence</h2>
+      <p class="sp" style="margin-bottom:0">A hybrid LDA + BERTopic pipeline discovers what users are actually discussing — and maps sentiment precisely onto each theme.</p>
+    </div>
+    <div class="topic-info rv d1">
+      <div class="ti"><div class="ti-ico">🔬</div><h3>LDA Coherence Optimization</h3><p>Systematic coherence scoring finds the ideal topic granularity — balancing interpretability with thematic breadth.</p><span class="ti-tag">Traditional NLP</span></div>
+      <div class="ti"><div class="ti-ico">🧬</div><h3>BERTopic Semantic Clustering</h3><p>Transformer-backed modeling captures semantic nuance that keyword-based methods fundamentally cannot detect.</p><span class="ti-tag">Transformers</span></div>
+      <div class="ti"><div class="ti-ico">🗺️</div><h3>Topic × Sentiment Mapping</h3><p>Cross-referencing topics with sentiment pinpoints which themes drive satisfaction and which generate frustration.</p><span class="ti-tag">Cross-Modal</span></div>
+    </div>
+    <div class="bento rv d2">
+      <div class="bt" onclick="openLb('outputs/figures/fig_nb04_01_lda_coherence.png','LDA Coherence Optimization')">
+        <div class="bt-img"><img src="outputs/figures/fig_nb04_01_lda_coherence.png" alt="LDA Coherence" loading="lazy"></div>
+        <div class="bt-foot"><h4>LDA Coherence</h4><p>Optimal topic count selection</p></div>
+      </div>
+      <div class="bt w2" onclick="openLb('outputs/figures/fig_nb04_03_bertopic_frequency.png','BERTopic Topic Frequency')">
+        <div class="bt-img"><img src="outputs/figures/fig_nb04_03_bertopic_frequency.png" alt="BERTopic Frequency" loading="lazy"></div>
+        <div class="bt-foot"><h4>BERTopic Topic Frequency</h4><p>Semantic cluster distribution across all 50K reviews</p></div>
+      </div>
+      <div class="bt w2" onclick="openLb('outputs/figures/fig_nb04_04_topic_sentiment_heatmap.png','Topic × Sentiment Heatmap')">
+        <div class="bt-img"><img src="outputs/figures/fig_nb04_04_topic_sentiment_heatmap.png" alt="Topic Sentiment Heatmap" loading="lazy"></div>
+        <div class="bt-foot"><h4>Topic × Sentiment Heatmap</h4><p>Which themes carry positive vs negative signals</p></div>
+      </div>
+      <div class="bt" onclick="openLb('outputs/figures/fig_nb04_08_topic_dashboard.png','Topic Intelligence Dashboard')">
+        <div class="bt-img"><img src="outputs/figures/fig_nb04_08_topic_dashboard.png" alt="Topic Dashboard" loading="lazy"></div>
+        <div class="bt-foot"><h4>Topic Dashboard</h4><p>Unified thematic view</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MIGRATION ══════════ -->
+<section id="migration" class="sec">
+  <div class="inner">
+    <div class="rv" style="margin-bottom:0">
+      <div class="ey">Notebook 05</div>
+      <h2 class="sh">Migration intelligence</h2>
+      <p class="sp" style="margin-bottom:0">Mapping who switches between AI platforms, which direction they flow, and why they leave.</p>
+      <div class="mig-facts">
+        <div class="mf"><div class="mf-d d-teal"></div>Claude: strongest migration winner</div>
+        <div class="mf"><div class="mf-d d-blue"></div>ChatGPT: center of the ecosystem</div>
+        <div class="mf"><div class="mf-d d-amber"></div>Accuracy is the #1 switch driver</div>
+        <div class="mf"><div class="mf-d d-rose"></div>UX is the #2 migration factor</div>
+      </div>
+    </div>
+    <div class="mig-figs rv d1">
+      <div class="mfig" onclick="openLb('outputs/figures/fig_nb05_03_migration_matrix.png','Platform Migration Matrix')">
+        <div class="mfig-img"><img src="outputs/figures/fig_nb05_03_migration_matrix.png" alt="Migration Matrix" loading="lazy"></div>
+        <div class="mfig-cap">↳ Platform-to-Platform Migration Matrix</div>
+      </div>
+      <div class="mfig" onclick="openLb('outputs/figures/fig_nb05_04_network_graph.png','Competitive Migration Network')">
+        <div class="mfig-img"><img src="outputs/figures/fig_nb05_04_network_graph.png" alt="Network Graph" loading="lazy"></div>
+        <div class="mfig-cap">↳ Competitive Migration Network Graph</div>
+      </div>
+      <div class="mfig" onclick="openLb('outputs/figures/fig_nb05_02_migration_reasons.png','Migration Reasons')">
+        <div class="mfig-img"><img src="outputs/figures/fig_nb05_02_migration_reasons.png" alt="Migration Reasons" loading="lazy"></div>
+        <div class="mfig-cap">↳ Primary Reasons for Platform Switching</div>
+      </div>
+      <div class="mfig" onclick="openLb('outputs/figures/fig_nb05_07_competitive_dashboard.png','Competitive Intelligence Dashboard')">
+        <div class="mfig-img"><img src="outputs/figures/fig_nb05_07_competitive_dashboard.png" alt="Competitive Dashboard" loading="lazy"></div>
+        <div class="mfig-cap">↳ Competitive Intelligence Dashboard</div>
+      </div>
+    </div>
+    <div class="mfig mig-full rv d2" onclick="openLb('outputs/figures/fig_nb05_06_migration_sentiment_heatmap.png','Migration × Sentiment Heatmap')" style="margin-top:12px">
+      <div class="mfig-img" style="min-height:130px"><img src="outputs/figures/fig_nb05_06_migration_sentiment_heatmap.png" alt="Migration Sentiment Heatmap" loading="lazy"></div>
+      <div class="mfig-cap">↳ Migration × Sentiment Heatmap</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ COMPETITIVE ══════════ -->
+<section id="competitive" class="sec">
+  <div class="inner">
+    <div class="ctr rv" style="margin-bottom:0">
+      <div class="ey">Key Findings</div>
+      <h2 class="sh">Competitive intelligence</h2>
+      <p class="sp">The five headline insights from 50,000 reviews across five platforms.</p>
+    </div>
+    <div class="big-row">
+      <div class="bcard bcard-amber rv d1"><div class="bc-ico bc-amber">🏆</div><div class="bc-label">Highest Satisfaction</div><div class="bc-val">Microsoft Copilot</div><div class="bc-desc">Top community-weighted TWSI score — a result invisible to standard sentiment methods</div></div>
+      <div class="bcard bcard-blue rv d2"><div class="bc-ico bc-blue">📣</div><div class="bc-label">Most Mentioned</div><div class="bc-val">ChatGPT</div><div class="bc-desc">Dominant in cross-platform comparisons and competitive references ecosystem-wide</div></div>
+      <div class="bcard bcard-teal rv d3"><div class="bc-ico bc-teal">🚀</div><div class="bc-label">Migration Winner</div><div class="bc-val">Claude</div><div class="bc-desc">Strongest net positive migration flow in the competitive switching network</div></div>
+      <div class="bcard bcard-purple rv d4"><div class="bc-ico bc-purple">💬</div><div class="bc-label">Top Discussed Theme</div><div class="bc-val">Response Quality</div><div class="bc-desc">Accuracy and output relevance dominate user discourse on all five platforms</div></div>
+      <div class="bcard bcard-rose rv d4"><div class="bc-ico bc-rose">⚠️</div><div class="bc-label">Top Complaint</div><div class="bc-val">Accuracy Issues</div><div class="bc-desc">Hallucinations and factual errors remain the ecosystem-wide primary pain point</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ GALLERY (outputs/figures only) ══════════ -->
+<section id="gallery" class="sec">
+  <div class="inner">
+    <div class="ctr rv" style="margin-bottom:36px">
+      <div class="ey">Research Figures</div>
+      <h2 class="sh">Insight gallery</h2>
+      <p class="sp">Every output figure from the analysis pipeline. Click to view full resolution.</p>
+    </div>
+    <div class="ctr rv d1" style="margin-bottom:40px">
+      <div class="gallery-note">📂 &nbsp; outputs / figures</div>
+    </div>
+    <div class="masonry rv d2">
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb03_04_twsi_ranking.png','nb03 — TWSI Platform Ranking')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb03_04_twsi_ranking.png" alt="TWSI Ranking" loading="lazy"></div>
+        <div class="mason-cap">nb03 — TWSI Ranking</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb03_07_platform_dashboard.png','nb03 — Platform Sentiment Dashboard')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb03_07_platform_dashboard.png" alt="Platform Dashboard" loading="lazy"></div>
+        <div class="mason-cap">nb03 — Platform Dashboard</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb04_01_lda_coherence.png','nb04 — LDA Coherence Optimization')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb04_01_lda_coherence.png" alt="LDA Coherence" loading="lazy"></div>
+        <div class="mason-cap">nb04 — LDA Coherence</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb04_03_bertopic_frequency.png','nb04 — BERTopic Frequency')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb04_03_bertopic_frequency.png" alt="BERTopic" loading="lazy"></div>
+        <div class="mason-cap">nb04 — BERTopic Frequency</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb04_04_topic_sentiment_heatmap.png','nb04 — Topic × Sentiment Heatmap')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb04_04_topic_sentiment_heatmap.png" alt="Topic Sentiment" loading="lazy"></div>
+        <div class="mason-cap">nb04 — Topic Sentiment Heatmap</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb04_05_platform_topic_heatmap.png','nb04 — Platform × Topic Heatmap')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb04_05_platform_topic_heatmap.png" alt="Platform Topic" loading="lazy"></div>
+        <div class="mason-cap">nb04 — Platform × Topic Heatmap</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb04_08_topic_dashboard.png','nb04 — Topic Intelligence Dashboard')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb04_08_topic_dashboard.png" alt="Topic Dashboard" loading="lazy"></div>
+        <div class="mason-cap">nb04 — Topic Dashboard</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb05_01_platform_mentions.png','nb05 — Platform Mentions')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb05_01_platform_mentions.png" alt="Platform Mentions" loading="lazy"></div>
+        <div class="mason-cap">nb05 — Platform Mentions</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb05_02_migration_reasons.png','nb05 — Migration Reasons')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb05_02_migration_reasons.png" alt="Migration Reasons" loading="lazy"></div>
+        <div class="mason-cap">nb05 — Migration Reasons</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb05_03_migration_matrix.png','nb05 — Migration Matrix')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb05_03_migration_matrix.png" alt="Migration Matrix" loading="lazy"></div>
+        <div class="mason-cap">nb05 — Migration Matrix</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb05_04_network_graph.png','nb05 — Network Graph')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb05_04_network_graph.png" alt="Network Graph" loading="lazy"></div>
+        <div class="mason-cap">nb05 — Network Graph</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb05_06_migration_sentiment_heatmap.png','nb05 — Migration Sentiment Heatmap')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb05_06_migration_sentiment_heatmap.png" alt="Migration Sentiment" loading="lazy"></div>
+        <div class="mason-cap">nb05 — Migration Sentiment</div>
+      </div>
+      <div class="mason" onclick="openLb('outputs/figures/fig_nb05_07_competitive_dashboard.png','nb05 — Competitive Dashboard')">
+        <div class="mason-img"><img src="outputs/figures/fig_nb05_07_competitive_dashboard.png" alt="Competitive Dashboard" loading="lazy"></div>
+        <div class="mason-cap">nb05 — Competitive Dashboard</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ RESEARCH ══════════ -->
+<section id="research" class="sec">
+  <div class="inner">
+    <div class="ctr rv" style="margin-bottom:0">
+      <div class="ey">Original Contributions</div>
+      <h2 class="sh">Research contributions</h2>
+      <p class="sp">Five original methodological contributions to NLP and competitive intelligence.</p>
+    </div>
+    <div class="res-grid">
+      <div class="rcard rv d1"><div class="rc-n">01 / 05</div><div class="rc-ico">⚖️</div><h3>Community-Weighted Sentiment Ranking</h3><p>A novel TWSI system incorporating community endorsement signals to surface consensus satisfaction invisible to standard sentiment tools.</p></div>
+      <div class="rcard rv d2"><div class="rc-n">02 / 05</div><div class="rc-ico">🔀</div><h3>Hybrid Topic Modeling Framework</h3><p>Combining LDA coherence optimization with BERTopic for both interpretability and semantic richness at large scale.</p></div>
+      <div class="rcard rv d3"><div class="rc-n">03 / 05</div><div class="rc-ico">🗺️</div><h3>Migration Intelligence Framework</h3><p>A network-based framework for detecting, quantifying, and visualizing user switching patterns across AI platforms.</p></div>
+      <div class="rcard rv d1"><div class="rc-n">04 / 05</div><div class="rc-ico">📊</div><h3>Competitive Intelligence Dashboard</h3><p>Interactive Streamlit dashboards enabling real-time competitive analysis across sentiment, topics, and migration signals.</p></div>
+      <div class="rcard rv d2"><div class="rc-n">05 / 05</div><div class="rc-ico">🌐</div><h3>Cross-Platform Ecosystem Analytics</h3><p>Treating five platforms as one competitive ecosystem — enabling relative positioning and trend analysis at the ecosystem level.</p></div>
+      <div class="rcard hi rv d3"><div class="rc-n">Impact</div><div class="rc-ico">🎯</div><h3>State-of-the-Art NLP Pipeline</h3><p>VADER · TextBlob · NLTK · BERTopic · Gensim · NetworkX · Transformers — a fully reproducible, modular framework for academic or industry deployment.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DATASET ══════════ -->
+<section id="dataset" class="sec">
+  <div class="inner">
+    <div class="ds-grid">
+      <div class="ds-copy rv">
+        <div class="ey">Data Source</div>
+        <h2 class="sh">The dataset</h2>
+        <p class="sp">The "Generative AI Ecosystem: 50K User Reviews 2026" — a balanced, richly annotated corpus covering all five platforms with embedded competitive and migration signals.</p>
+        <div class="ds-stats">
+          <div class="dss"><div class="dss-n">50,000</div><div class="dss-l">Total Reviews</div></div>
+          <div class="dss"><div class="dss-n">5</div><div class="dss-l">Platforms</div></div>
+          <div class="dss"><div class="dss-n">Balanced</div><div class="dss-l">Distribution</div></div>
+          <div class="dss"><div class="dss-n">Rich</div><div class="dss-l">Text Feedback</div></div>
+        </div>
+        <a href="https://www.kaggle.com/datasets/jahnavikachhia23/the-generative-ai-ecosystem-50k-user-reviews-2026" target="_blank" class="btn-fill" style="width:fit-content">Open on Kaggle ↗</a>
+      </div>
+      <div class="ds-panel rv d2">
+        <div class="ds-ph">Reviews per platform</div>
+        <div class="ds-br"><div class="ds-br-l">ChatGPT</div><div class="ds-track"><div class="ds-fill" data-w="100" style="background:linear-gradient(90deg,#10a37f,#1dc68a)"></div></div><div class="ds-br-n">10K</div></div>
+        <div class="ds-br"><div class="ds-br-l">Gemini</div><div class="ds-track"><div class="ds-fill" data-w="100" style="background:linear-gradient(90deg,#4285F4,#0FA85E)"></div></div><div class="ds-br-n">10K</div></div>
+        <div class="ds-br"><div class="ds-br-l">Claude</div><div class="ds-track"><div class="ds-fill" data-w="100" style="background:linear-gradient(90deg,#D97757,#e8784d)"></div></div><div class="ds-br-n">10K</div></div>
+        <div class="ds-br"><div class="ds-br-l">Copilot</div><div class="ds-track"><div class="ds-fill" data-w="100" style="background:linear-gradient(90deg,#0078d4,#50a3e0)"></div></div><div class="ds-br-n">10K</div></div>
+        <div class="ds-br"><div class="ds-br-l">Perplexity</div><div class="ds-track"><div class="ds-fill" data-w="100" style="background:linear-gradient(90deg,#20b2aa,#00d4ca)"></div></div><div class="ds-br-n">10K</div></div>
+        <div class="ds-chips">
+          <span class="dchip">Sentiment Labels</span>
+          <span class="dchip">Migration Signals</span>
+          <span class="dchip">Competitive Mentions</span>
+          <span class="dchip">Platform Comparisons</span>
+          <span class="dchip">Feature Requests</span>
+          <span class="dchip">Pain Points</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TECH ══════════ -->
+<section id="tech" class="sec">
+  <div class="inner">
+    <div class="ctr rv">
+      <div class="ey">Technologies</div>
+      <h2 class="sh">Built with</h2>
+      <p class="sp">A production-grade NLP and data science stack — from ingestion to interactive deployment.</p>
+    </div>
+    <div class="tech-cloud rv d1">
+      <div class="tp"><div class="tp-d"></div>Python</div>
+      <div class="tp"><div class="tp-d"></div>Pandas</div>
+      <div class="tp"><div class="tp-d"></div>NumPy</div>
+      <div class="tp"><div class="tp-d"></div>Scikit-Learn</div>
+      <div class="tp"><div class="tp-d"></div>NLTK</div>
+      <div class="tp"><div class="tp-d"></div>TextBlob</div>
+      <div class="tp"><div class="tp-d"></div>VADER</div>
+      <div class="tp"><div class="tp-d"></div>BERTopic</div>
+      <div class="tp"><div class="tp-d"></div>Gensim</div>
+      <div class="tp"><div class="tp-d"></div>NetworkX</div>
+      <div class="tp"><div class="tp-d"></div>Transformers</div>
+      <div class="tp"><div class="tp-d"></div>Plotly</div>
+      <div class="tp"><div class="tp-d"></div>Matplotlib</div>
+      <div class="tp"><div class="tp-d"></div>Seaborn</div>
+      <div class="tp"><div class="tp-d"></div>Streamlit</div>
+      <div class="tp"><div class="tp-d"></div>Hugging Face</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-inner rv">
+    <div class="cta-ey">Open Source Research</div>
+    <h2 class="cta-h">Explore the full research</h2>
+    <p class="cta-p">All notebooks, datasets, figures, and code are publicly available. Reproduce the analysis, build on the framework, or fork the project.</p>
+    <div class="cta-btns">
+      <a href="https://github.com/hiifza/AI-Platform-Sentiment-and-Migration-Analysis" target="_blank" class="btn-fill">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub Repository
+      </a>
+      <a href="https://www.kaggle.com/datasets/jahnavikachhia23/the-generative-ai-ecosystem-50k-user-reviews-2026" target="_blank" class="btn-stroke">Kaggle Dataset ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot">
+    <div class="foot-brand">AI Ecosystem 2026</div>
+    <div class="foot-links">
+      <a href="https://github.com/hiifza/AI-Platform-Sentiment-and-Migration-Analysis" target="_blank">GitHub</a>
+      <a href="https://www.kaggle.com/datasets/jahnavikachhia23/the-generative-ai-ecosystem-50k-user-reviews-2026" target="_blank">Kaggle</a>
+      <a href="#hero">↑ Top</a>
+    </div>
+    <div class="foot-copy">50K Reviews · 5 Platforms · 2026</div>
+  </div>
+</footer>
+
+<script>
+// LOADER
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('out'),900));
+
+// NAV
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('stuck',window.scrollY>50);
+});
+
+// LIGHTBOX
+function openLb(src,cap){
+  document.getElementById('lb-img').src=src;
+  document.getElementById('lb-cap').textContent=cap;
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+document.getElementById('lb-x').onclick=closeLb;
+document.getElementById('lb').onclick=e=>{if(e.target===document.getElementById('lb'))closeLb()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb()});
+function closeLb(){document.getElementById('lb').classList.remove('open');document.body.style.overflow='';}
+
+// REVEAL
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target)}});
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+
+// DS BARS
+const bo=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.ds-fill[data-w]').forEach(b=>b.style.width=b.dataset.w+'%');
+      bo.unobserve(e.target);
+    }
+  });
+},{threshold:0.25});
+document.querySelectorAll('.ds-panel').forEach(el=>bo.observe(el));
+
+// subtle hero glow mouse parallax
+const mesh=document.querySelector('.hero-mesh');
+document.addEventListener('mousemove',e=>{
+  if(!mesh)return;
+  const x=(e.clientX/window.innerWidth-0.5)*20;
+  const y=(e.clientY/window.innerHeight-0.5)*14;
+  mesh.style.transform=`translate(${x}px,${y}px)`;
+});
+</script>
+</body>
+</html>
